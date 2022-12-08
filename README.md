@@ -4,6 +4,9 @@ This GitHub action bookmarks websites to a JSON file. Pair it with the [iOS Shor
 
 [Create a workflow dispatch event](https://docs.github.com/en/rest/actions/workflows#create-a-workflow-dispatch-event) with basic information about the bookmark. The action will then fetch the web page's metadata using [open-graph-scraper](https://www.npmjs.com/package/open-graph-scraper) and add it to your JSON file in your repository, always sorting by the bookmark date.
 
+## Changes from the fork
+* When you bookmark a website it goes to a
+
 <!-- START GENERATED DOCUMENTATION -->
 
 ## Set up the workflow
@@ -59,7 +62,7 @@ jobs:
 To trigger the action, [create a workflow dispatch event](https://docs.github.com/en/rest/actions/workflows#create-a-workflow-dispatch-event) with the following body parameters:
 
 ```js
-{ 
+{
   "ref": "main", // Required. The git reference for the workflow, a branch or tag name.
   "inputs": {
     "url": "", // Required. The URL to bookmark.

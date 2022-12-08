@@ -1,11 +1,16 @@
-name: Bookmark
-author: "@katydecorah"
-description: "Bookmark websites to a JSON file."
+name: Bookmark Post
+author: "@joshghent"
+description: "Build a automatic blog post based on a bookmarks file."
 runs:
   using: "node16"
   main: dist/index.js
 
 inputs:
-  fileName:
-    description: "The filename to save your bookmarks."
+  postFileName:
+    description: "The filename to save your blog post."
+  bookmarksFile:
+    description: "The place where to find your bookmarks metadata."
     default: "_data/bookmarks.json"
+  numberOfDays:
+    description: "The number of days of bookmarks to include in your post"
+    default: 30

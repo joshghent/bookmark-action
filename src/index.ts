@@ -1,42 +1,33 @@
-import { exportVariable, getInput, setFailed } from "@actions/core";
+import { getInput, setFailed } from "@actions/core";
 import * as github from "@actions/github";
-import { isUrl, isDate } from "./utils.js";
-import { saveBookmarks } from "./save-bookmarks";
-import { addBookmark, Bookmark } from "./add-bookmark";
-import { getMetadata } from "./get-metadata";
+import { buildReviewPost } from "./build-post-content";
+import { getLinksFromDays } from "./get-bookmarks";
+import { createPost } from "./create-post";
 
 export async function action() {
   try {
     // Get inputs
     const payload = github.context.payload.inputs;
 
-    // Validate inputs
-    if (!payload) return setFailed("Missing `inputs`");
-    if (!payload.url) return setFailed("Missing `url` in payload");
+    const bookmarksFile = getInput("bookmarksFile");
+    const numberOfDays = Number(getInput("numberOfDays"));
+    const todaysDate = new Date();
+    const xNumberOfDaysAgo = new Date();
+    xNumberOfDaysAgo.setDate(xNumberOfDaysAgo.getDate() - numberOfDays);
 
-    const { url, notes } = payload;
+    const bookmarks = await getLinksFromDays({
+      bookmarksFile,
+      dateFrom: xNumberOfDaysAgo,
+      dateTo: todaysDate,
+    });
 
-    if (!isUrl(url)) {
-      return setFailed(`The \`url\` "${url}" is not valid`);
-    }
-
-    if (payload.date && !isDate(payload.date)) {
-      return setFailed(
-        `The \`date\` "${payload.date}" must be in YYYY-MM-DD format`
-      );
-    }
-    const date = payload.date || new Date().toISOString().slice(0, 10);
-    exportVariable("DateBookmarked", date);
-
-    const fileName = getInput("fileName");
-
-    const page = (await getMetadata({ url, notes, date })) as Bookmark;
-    const bookmarks = await addBookmark(fileName, page);
-    if (!bookmarks) {
-      setFailed(`Unable to add bookmark`);
-      return;
-    }
-    await saveBookmarks({ fileName, bookmarks });
+    const postFileName = getInput("postFileName");
+    const content = await buildReviewPost({
+      bookmarks,
+      dateFrom: xNumberOfDaysAgo,
+      dateTo: todaysDate,
+    });
+    await createPost({ fileName: postFileName, content });
   } catch (error) {
     setFailed(error.message);
   }
